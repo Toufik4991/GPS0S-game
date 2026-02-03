@@ -1,0 +1,156 @@
+/* ═══════════════════════════════════════════════════════
+   GPS0S - STYLE NÉON RÉTRO
+   ═══════════════════════════════════════════════════════ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0033 100%);
+    color: #00ff88;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ───────────────────────────────────────────────────────
+   ÉCRAN DE CHARGEMENT
+   ─────────────────────────────────────────────────────── */
+#loading-screen {
+    text-align: center;
+    animation: pulse 2s infinite;
+}
+
+.moon-loader {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    background: radial-gradient(circle, #ffff00 30%, #ff00ff 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 30px #ff00ff, 0 0 60px #00ffff;
+    animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+#loading-screen p {
+    font-size: 1.5rem;
+    text-shadow: 0 0 10px #00ff88;
+}
+
+/* ───────────────────────────────────────────────────────
+   INTERFACE PRINCIPALE
+   ─────────────────────────────────────────────────────── */
+#game-container {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+#energy-bar {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid #00ff88;
+    border-radius: 20px;
+    padding: 10px 20px;
+    box-shadow: 0 0 15px #00ff88;
+}
+
+#energy-text {
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-shadow: 0 0 5px #00ff88;
+}
+
+#chest-btn {
+    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+    border: none;
+    border-radius: 15px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 20px #ff00ff;
+    transition: transform 0.2s;
+}
+
+#chest-btn:hover {
+    transform: scale(1.1);
+}
+
+/* ───────────────────────────────────────────────────────
+   ZONE GPS
+   ─────────────────────────────────────────────────────── */
+#gps-zone {
+    text-align: center;
+    margin: 30px 0;
+}
+
+#distance-text {
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px #00ff88;
+}
+
+.zone-red { color: #ff3333; text-shadow: 0 0 15px #ff3333; }
+.zone-orange { color: #ff9933; text-shadow: 0 0 15px #ff9933; }
+.zone-green { color: #00ff88; text-shadow: 0 0 15px #00ff88; }
+.zone-blue { color: #00ccff; text-shadow: 0 0 15px #00ccff; }
+
+/* ───────────────────────────────────────────────────────
+   BOUTONS
+   ─────────────────────────────────────────────────────── */
+button {
+    display: block;
+    width: 100%;
+    margin: 15px 0;
+    padding: 15px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: 2px solid #00ff88;
+    border-radius: 10px;
+    background: rgba(0, 255, 136, 0.1);
+    color: #00ff88;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-shadow: 0 0 5px #00ff88;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+}
+
+button:hover {
+    background: rgba(0, 255, 136, 0.3);
+    transform: scale(1.05);
+}
+
+#ar-btn {
+    border-color: #00ccff;
+    color: #00ccff;
+    text-shadow: 0 0 10px #00ccff;
+}
+
+#games-btn {
+    border-color: #ff00ff;
+    color: #ff00ff;
+    text-shadow: 0 0 10px #ff00ff;
+}
