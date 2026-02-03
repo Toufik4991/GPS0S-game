@@ -2,54 +2,100 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" width=device-width, initial-scale=1.0">
     <title>GPS0S - Chasse à la Lune</title>
     <link rel="stylesheet" href="css/style.css">
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
 </head>
 <body>
-    <!-- ÉCRAN DE CHARGEMENT -->
+    <!-- ═══════════════════════════════════════════════════════
+         ÉCRAN DE CHARGEMENT
+         ═══════════════════════════════════════════════════════ -->
     <div id="loading-screen">
         <div class="moon-loader"></div>
         <p>Chargement de la Lune...</p>
     </div>
 
-    <!-- INTERFACE PRINCIPALE -->
+    <!-- ═══════════════════════════════════════════════════════
+         INTERFACE PRINCIPALE
+         ═══════════════════════════════════════════════════════ -->
     <div id="game-container" style="display:none;">
-        <!-- HEADER : Énergie + Coffre -->
+        
+        <!-- ─────────────────────────────────────────────────
+             HEADER : Coffre à Lunes
+             ───────────────────────────────────────────────── -->
         <header>
-            <div id="energy-bar">
-                <span id="energy-text">100%</span>
-            </div>
             <button id="chest-btn">🌙 Coffre: <span id="moon-count">0</span>/9</button>
         </header>
 
-        <!-- ZONE GPS : Affichage de la distance -->
+        <!-- ─────────────────────────────────────────────────
+             STATUS GPS
+             ───────────────────────────────────────────────── -->
+        <div id="gps-status">
+            <div class="status-item">
+                <span>📍 Distance</span>
+                <strong id="distance">---</strong>
+            </div>
+            <div class="status-item">
+                <span>🎯 Point</span>
+                <strong id="current-point">1/9</strong>
+            </div>
+        </div>
+
+        <!-- ─────────────────────────────────────────────────
+             BARRE D'ÉNERGIE
+             ───────────────────────────────────────────────── -->
+        <div id="energy-container">
+            <p style="margin-bottom: 5px; font-size: 14px; color: #00ff88;">⚡ Énergie</p>
+            <div id="energy-bar-bg">
+                <div id="energy-bar"></div>
+                <div id="energy-text">100%</div>
+            </div>
+        </div>
+
+        <!-- ─────────────────────────────────────────────────
+             ZONE GPS : Indicateur de couleur
+             ───────────────────────────────────────────────── -->
         <div id="gps-zone">
             <p id="distance-text">Recherche GPS...</p>
             <div id="zone-indicator" class="zone-red"></div>
         </div>
 
-        <!-- BOUSSOLE -->
+        <!-- ─────────────────────────────────────────────────
+             BOUSSOLE
+             ───────────────────────────────────────────────── -->
         <div id="compass-container">
-            <button id="compass-btn">🧭 Activer</button>
-            <div id="compass-arrow" style="display:none;"></div>
+            <button id="compass-btn">🧭 Activer Boussole</button>
+            <div id="compass-arrow" style="display:none;">
+                <div class="arrow">↑</div>
+            </div>
         </div>
 
-        <!-- BOUTON AR (Apparaît en zone bleue) -->
-        <button id="ar-btn" style="display:none;">📸 Capturer la Lune</button>
+        <!-- ─────────────────────────────────────────────────
+             BOUTON AR (Apparaît en zone bleue ≤5m)
+             ───────────────────────────────────────────────── -->
+        <button id="ar-btn" style="display:none;">📸 Capturer la Lune en AR</button>
 
-        <!-- BOUTON MINI-JEUX (Apparaît en zone verte) -->
-        <button id="games-btn" style="display:none;">🎮 Mini-Jeux</button>
+        <!-- ─────────────────────────────────────────────────
+             BOUTON MINI-JEUX (Apparaît en zone verte)
+             ───────────────────────────────────────────────── -->
+        <button id="games-btn" style="display:none;">🎮 Mini-Jeux (Recharger Énergie)</button>
 
-        <!-- BOUTON POINT SUIVANT (Après capture) -->
+        <!-- ─────────────────────────────────────────────────
+             BOUTON POINT SUIVANT (Après capture)
+             ───────────────────────────────────────────────── -->
         <button id="next-btn" style="display:none;">➡️ Point GPS Suivant</button>
 
-        <!-- MESSAGE DE LA LUNE -->
-        <div id="moon-message"></div>
+        <!-- ─────────────────────────────────────────────────
+             DIALOGUE DE LA LUNE (Messages sarcastiques)
+             ───────────────────────────────────────────────── -->
+        <div id="moon-dialog"></div>
+
     </div>
 
-    <!-- VIEWER AR (Caché par défaut) -->
+    <!-- ═══════════════════════════════════════════════════════
+         VIEWER AR (Caché par défaut)
+         ═══════════════════════════════════════════════════════ -->
     <model-viewer id="ar-viewer" style="display:none;"
         ar ar-modes="scene-viewer quick-look"
         camera-controls
@@ -57,11 +103,13 @@
         ios-src="assets/models/moon.usdz">
     </model-viewer>
 
-    <!-- SCRIPTS -->
+    <!-- ═══════════════════════════════════════════════════════
+         SCRIPTS (Ordre IMPORTANT !)
+         ═══════════════════════════════════════════════════════ -->
     <script src="js/storage.js"></script>
     <script src="js/gps.js"></script>
-    <script src="js/compass.js"></script>
     <script src="js/energy.js"></script>
+    <script src="js/compass.js"></script>
     <script src="js/ar.js"></script>
     <script src="js/minigames.js"></script>
     <script src="js/main.js"></script>
