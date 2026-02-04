@@ -1,0 +1,625 @@
+/* ═══════════════════════════════════════════════════════
+   GPS0S - RÉTRO GAMING 8-BIT NÉON (SOFT VERSION)
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+    /* Palette Néon Soft */
+    --neon-cyan: #00ffcc;
+    --neon-purple: #8b00ff;
+    --neon-pink: #ff00ff;
+    --neon-blue: #0064ff;
+    --neon-gold: #ffd700;
+    --dark-main: #0a0a0a;
+    --dark-secondary: #1a0033;
+    --dark-card: rgba(75, 0, 130, 0.5);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(135deg, var(--dark-main) 0%, var(--dark-secondary) 100%);
+    color: var(--neon-cyan);
+    overflow: hidden;
+    height: 100vh;
+    width: 100%;
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ÉCRAN DE CHARGEMENT
+   ═══════════════════════════════════════════════════════ */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #000000, var(--dark-secondary));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease;
+}
+
+#loading-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.moon-loader {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--neon-purple), var(--neon-cyan));
+    animation: moon-spin 2s infinite linear;
+    box-shadow: 0 0 50px rgba(139, 0, 255, 0.8);
+}
+
+@keyframes moon-spin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.2); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+#loading-screen p {
+    margin-top: 30px;
+    font-size: 1.2em;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(0, 255, 204, 0.7);
+    text-align: center;
+    padding: 0 20px;
+}
+
+.progress-bar {
+    width: 80%;
+    max-width: 300px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin-top: 20px;
+    overflow: hidden;
+    border: 1px solid var(--neon-cyan);
+}
+
+#progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+    transition: width 0.3s ease;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ÉCRAN SELFIE (CADRE OVALE)
+   ═══════════════════════════════════════════════════════ */
+#selfie-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--dark-secondary), #000);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9998;
+    padding: 20px;
+    text-align: center;
+}
+
+#selfie-screen h1 {
+    font-size: 2.5em;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 30px rgba(0, 255, 204, 1);
+    margin-bottom: 10px;
+}
+
+#selfie-screen p {
+    font-size: 1em;
+    color: var(--neon-purple);
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+#selfie-video, #selfie-preview {
+    width: 90%;
+    max-width: 300px;
+    height: 380px;
+    border-radius: 50%; /* ← CADRE OVALE */
+    object-fit: cover;
+    border: 4px solid var(--neon-cyan);
+    box-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
+    margin-bottom: 20px;
+}
+
+#selfie-canvas {
+    display: none;
+}
+
+#take-selfie-btn,
+#start-game-btn {
+    padding: 15px 40px;
+    font-size: 1.3em;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+    border: none;
+    border-radius: 50px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
+    font-family: inherit;
+    margin-top: 10px;
+}
+
+#take-selfie-btn:active,
+#start-game-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 30px rgba(139, 0, 255, 0.8);
+}
+
+/* ═══════════════════════════════════════════════════════
+   INTERFACE PRINCIPALE (MOBILE-FIRST)
+   ═══════════════════════════════════════════════════════ */
+#game-container {
+    display: none; /* Caché par défaut, activé après selfie */
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+}
+
+/* ─────────────────────────────────────────────────────
+   HEADER (Profil, Énergie, Coffre, Paramètres)
+   ───────────────────────────────────────────────────── */
+#game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.8);
+    border-bottom: 2px solid var(--neon-cyan);
+    gap: 10px;
+}
+
+.header-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: var(--dark-card);
+    border: 2px solid var(--neon-cyan);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.3em;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+    position: relative;
+}
+
+.header-icon:active {
+    transform: scale(0.9);
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.7);
+}
+
+#profile-btn {
+    background-image: var(--player-avatar); /* Injecté via JS */
+    background-size: cover;
+    background-position: center;
+}
+
+#chest-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--neon-gold);
+    color: #000;
+    font-size: 0.7em;
+    font-weight: bold;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Barre d'énergie */
+#energy-bar {
+    flex: 1;
+    height: 35px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 20px;
+    border: 2px solid var(--neon-cyan);
+    overflow: hidden;
+    position: relative;
+}
+
+#energy-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue));
+    transition: width 0.5s ease;
+}
+
+#energy-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.9em;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 5px black;
+}
+
+/* ─────────────────────────────────────────────────────
+   ZONE CENTRALE (GPS + Boussole)
+   ───────────────────────────────────────────────────── */
+#game-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Zone GPS Colorée */
+#zone-indicator {
+    margin: 20px 0;
+    padding: 20px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.zone-red {
+    background: rgba(255, 0, 0, 0.2);
+    border: 2px solid #ff0000;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+}
+
+.zone-orange {
+    background: rgba(255, 165, 0, 0.2);
+    border: 2px solid #ffa500;
+    box-shadow: 0 0 20px rgba(255, 165, 0, 0.5);
+}
+
+.zone-green {
+    background: rgba(0, 255, 0, 0.2);
+    border: 2px solid #00ff00;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+}
+
+.zone-blue {
+    background: rgba(0, 100, 255, 0.3);
+    border: 2px solid var(--neon-blue);
+    box-shadow: 0 0 30px rgba(0, 100, 255, 0.8);
+    animation: pulse-blue 1s infinite;
+}
+
+@keyframes pulse-blue {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+.zone-icon {
+    font-size: 3em;
+    margin-bottom: 10px;
+}
+
+.zone-text {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+#distance-display {
+    font-size: 1.5em;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 20px rgba(0, 255, 204, 0.7);
+    margin: 20px 0;
+}
+
+/* Boussole */
+#compass-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 30px auto;
+}
+
+#compass-needle {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, var(--neon-purple), #4b0082);
+    border-radius: 50%;
+    border: 5px solid var(--neon-cyan);
+    position: relative;
+    transition: transform 0.5s ease;
+    box-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
+}
+
+#compass-needle::before {
+    content: '▲';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2em;
+    color: #ff0000;
+}
+
+#compass-btn {
+    position: absolute;
+    bottom: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    background: linear-gradient(135deg, var(--neon-cyan), #00cc99);
+    border: none;
+    border-radius: 25px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1em;
+    transition: transform 0.2s;
+    font-family: inherit;
+}
+
+#compass-btn:active {
+    transform: translateX(-50%) scale(0.95);
+}
+
+#compass-btn.active {
+    background: linear-gradient(135deg, var(--neon-pink), #ff0080);
+    color: white;
+}
+
+/* ─────────────────────────────────────────────────────
+   BOUTONS D'ACTION (AR, Boutique, Jeux)
+   ───────────────────────────────────────────────────── */
+#ar-btn {
+    position: fixed;
+    bottom: 180px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 20px 40px;
+    font-size: 1.3em;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+    border: none;
+    border-radius: 50px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(0, 100, 255, 0.8);
+    animation: ar-pulse 1.5s infinite;
+    z-index: 100;
+    font-family: inherit;
+}
+
+@keyframes ar-pulse {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.1); }
+}
+
+#shop-btn {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--neon-pink), var(--neon-cyan));
+    border: none;
+    color: white;
+    font-size: 1.2em;
+    padding: 15px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+    z-index: 100;
+    transition: transform 0.2s;
+    font-family: inherit;
+}
+
+#shop-btn:active {
+    transform: scale(0.95);
+}
+
+#games-btn {
+    position: fixed;
+    bottom: 100px;
+    left: 20px;
+    background: linear-gradient(135deg, #00ff00, #00cc00);
+    border: none;
+    color: #000;
+    font-size: 1.2em;
+    padding: 15px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+    z-index: 100;
+    font-family: inherit;
+}
+
+/* ═══════════════════════════════════════════════════════
+   🌙 DIALOGUE DE LA LUNE NARRATRICE
+   ═══════════════════════════════════════════════════════ */
+#moon-dialog {
+    position: fixed;
+    bottom: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--dark-card);
+    border: 2px solid var(--neon-cyan);
+    border-radius: 15px;
+    padding: 15px 20px;
+    max-width: 85%;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: bottom 0.5s ease;
+    z-index: 1000;
+    box-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
+}
+
+#moon-dialog.active {
+    bottom: 20px;
+}
+
+.moon-avatar {
+    font-size: 3em;
+    animation: moon-pulse 2s infinite;
+}
+
+@keyframes moon-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+#moon-text {
+    color: var(--neon-cyan);
+    font-size: 1em;
+    margin: 0;
+    text-shadow: 0 0 10px rgba(0, 255, 204, 0.7);
+    line-height: 1.4;
+}
+
+/* ═══════════════════════════════════════════════════════
+   🛒 BOUTIQUE MODALE
+   ═══════════════════════════════════════════════════════ */
+#shop-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    display: none;
+    flex-direction: column;
+    z-index: 2000;
+    overflow-y: auto;
+}
+
+#shop-modal.active {
+    display: flex;
+}
+
+.shop-header {
+    background: linear-gradient(135deg, #4b0082, var(--neon-purple));
+    padding: 20px;
+    text-align: center;
+    position: relative;
+}
+
+.shop-header h2 {
+    color: var(--neon-cyan);
+    margin: 0 0 10px 0;
+    font-size: 1.8em;
+    text-shadow: 0 0 20px rgba(0, 255, 204, 0.8);
+}
+
+.shop-header p {
+    color: #fff;
+    font-size: 1.3em;
+    margin: 0;
+}
+
+.shop-header button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 0, 0, 0.7);
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#shop-items {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.shop-item {
+    background: var(--dark-card);
+    border: 2px solid var(--neon-cyan);
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.shop-item-icon {
+    font-size: 2.5em;
+}
+
+.shop-item-info {
+    flex: 1;
+}
+
+.shop-item-info h3 {
+    color: var(--neon-cyan);
+    margin: 0 0 5px 0;
+    font-size: 1.1em;
+}
+
+.shop-item-info p {
+    color: #aaa;
+    margin: 0;
+    font-size: 0.9em;
+}
+
+.shop-item-btn {
+    background: linear-gradient(135deg, var(--neon-cyan), #00cc99);
+    border: none;
+    color: #000;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: transform 0.2s;
+    font-family: inherit;
+}
+
+.shop-item-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.shop-item-btn:disabled {
+    background: #555;
+    color: #999;
+    cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════════════════════
+   📱 RESPONSIVE (Petits écrans)
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 360px) {
+    #selfie-screen h1 { font-size: 2em; }
+    .zone-icon { font-size: 2.5em; }
+    #ar-btn { font-size: 1.1em; padding: 15px 30px; }
+    #moon-text { font-size: 0.9em; }
+}
+
+@media (max-height: 667px) {
+    #compass-container { width: 120px; height: 120px; }
+    #compass-needle::before { font-size: 1.5em; }
+}
