@@ -1,0 +1,1067 @@
+/* ═══════════════════════════════════════════════════════
+   GPS0S - RÉTRO GAMING 8-BIT NÉON (SOFT VERSION)
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+    /* Palette Néon Soft */
+    --neon-cyan: #00ffcc;
+    --neon-purple: #8b00ff;
+    --neon-pink: #ff00ff;
+    --neon-blue: #0064ff;
+    --neon-gold: #ffd700;
+    --dark-main: #0a0a0a;
+    --dark-secondary: #1a0033;
+    --dark-card: rgba(75, 0, 130, 0.5);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(135deg, var(--dark-main) 0%, var(--dark-secondary) 100%);
+    color: var(--neon-cyan);
+    overflow: hidden;
+    height: 100vh;
+    width: 100%;
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ÉCRAN DE CHARGEMENT
+   ═══════════════════════════════════════════════════════ */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #000000, var(--dark-secondary));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease;
+}
+
+#loading-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.moon-loader {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--neon-purple), var(--neon-cyan));
+    animation: moon-spin 2s infinite linear;
+    box-shadow: 0 0 50px rgba(139, 0, 255, 0.8);
+}
+
+@keyframes moon-spin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.2); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+#loading-screen p {
+    margin-top: 30px;
+    font-size: 1.2em;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(0, 255, 204, 0.7);
+    text-align: center;
+    padding: 0 20px;
+}
+
+.progress-bar {
+    width: 80%;
+    max-width: 300px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin-top: 20px;
+    overflow: hidden;
+    border: 1px solid var(--neon-cyan);
+}
+
+#progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+    transition: width 0.3s ease;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ÉCRAN SELFIE (CADRE OVALE)
+   ═══════════════════════════════════════════════════════ */
+#selfie-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--dark-secondary), #000);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9998;
+    padding: 20px;
+    text-align: center;
+}
+
+#selfie-screen h1 {
+    font-size: 2.5em;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 30px rgba(0, 255, 204, 1);
+    margin-bottom: 10px;
+}
+
+#selfie-screen p {
+    font-size: 1em;
+    color: var(--neon-purple);
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+#selfie-video, #selfie-preview {
+    width: 90%;
+    max-width: 300px;
+    height: 380px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--neon-cyan);
+    box-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
+    margin-bottom: 20px;
+}
+
+#selfie-canvas {
+    display: none;
+}
+
+#take-selfie-btn,
+#start-game-btn {
+    padding: 15px 40px;
+    font-size: 1.3em;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+    border: none;
+    border-radius: 50px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
+    font-family: inherit;
+    margin-top: 10px;
+}
+
+#take-selfie-btn:active,
+#start-game-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 30px rgba(139, 0, 255, 0.8);
+}
+
+#start-game-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CONTAINER PRINCIPAL DU JEU
+   ═══════════════════════════════════════════════════════ */
+#game-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    flex-direction: column;
+    background: linear-gradient(135deg, var(--dark-main), var(--dark-secondary));
+    z-index: 100;
+}
+
+/* ═══════════════════════════════════════════════════════
+   HEADER (HAUT DE L'ÉCRAN)
+   ═══════════════════════════════════════════════════════ */
+#header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border-bottom: 3px solid var(--neon-cyan);
+}
+
+#profile-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 3px solid var(--neon-cyan);
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
+    transition: transform 0.2s;
+}
+
+#profile-btn:active {
+    transform: scale(0.95);
+}
+
+#gps-info {
+    text-align: center;
+    flex: 1;
+}
+
+#gps-info h2 {
+    font-size: 1.5em;
+    color: var(--neon-purple);
+    text-shadow: 0 0 15px rgba(139, 0, 255, 0.8);
+}
+
+#current-gps {
+    color: var(--neon-gold);
+    font-weight: bold;
+}
+
+#settings-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 2em;
+    background: transparent;
+    border: 3px solid var(--neon-cyan);
+    border-radius: 50%;
+    color: var(--neon-cyan);
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#settings-btn:active {
+    transform: rotate(90deg);
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.8);
+}
+
+/* ═══════════════════════════════════════════════════════
+   BARRE D'ÉNERGIE
+   ═══════════════════════════════════════════════════════ */
+#energy-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.5);
+    border-bottom: 2px solid var(--neon-purple);
+}
+
+#energy-bar p {
+    margin-right: 15px;
+    font-size: 1.2em;
+    color: var(--neon-cyan);
+}
+
+#energy-container {
+    flex: 1;
+    max-width: 300px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    border: 2px solid var(--neon-purple);
+    overflow: hidden;
+    position: relative;
+}
+
+#energy-level {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+    transition: width 0.5s ease;
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
+}
+
+#energy-percentage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 10px #000;
+    font-size: 1em;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ZONE CENTRALE (GPS)
+   ═══════════════════════════════════════════════════════ */
+#gps-zone {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+#gps-card {
+    width: 90%;
+    max-width: 400px;
+    background: var(--dark-card);
+    border: 4px solid var(--neon-cyan);
+    border-radius: 20px;
+    padding: 40px 20px;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(0, 255, 204, 0.5);
+    backdrop-filter: blur(10px);
+    transition: all 0.5s;
+}
+
+#distance-label {
+    font-size: 1.2em;
+    color: var(--neon-purple);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+#distance {
+    font-size: 4em;
+    font-weight: bold;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 30px rgba(0, 255, 204, 1);
+    margin: 20px 0;
+}
+
+#distance-unit {
+    font-size: 1.5em;
+    color: var(--neon-purple);
+}
+
+#moon-message {
+    margin-top: 30px;
+    padding: 15px;
+    background: rgba(139, 0, 255, 0.2);
+    border: 2px solid var(--neon-purple);
+    border-radius: 15px;
+    font-size: 1em;
+    color: var(--neon-cyan);
+    font-style: italic;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ═══════════════════════════════════════════════════════
+   FOOTER (BOUTONS D'ACTION)
+   ═══════════════════════════════════════════════════════ */
+#footer {
+    display: flex;
+    justify-content: space-around;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.8);
+    border-top: 3px solid var(--neon-cyan);
+}
+
+.action-btn {
+    flex: 1;
+    margin: 0 5px;
+    padding: 15px 10px;
+    font-size: 1em;
+    font-weight: bold;
+    color: #000;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+    border: 2px solid var(--neon-cyan);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 5px 15px rgba(0, 255, 204, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: inherit;
+}
+
+.action-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 2px 10px rgba(0, 255, 204, 0.6);
+}
+
+#compass-btn {
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
+    border-color: var(--neon-blue);
+}
+
+#ar-btn {
+    background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+    border-color: var(--neon-purple);
+    display: none;
+}
+
+#shop-btn {
+    background: linear-gradient(135deg, var(--neon-gold), #ff9500);
+    border-color: var(--neon-gold);
+}
+
+#chest-btn {
+    background: linear-gradient(135deg, #ff6600, #ff0055);
+    border-color: #ff6600;
+    position: relative;
+}
+
+/* ═══════════════════════════════════════════════════════
+   MODALES (PROFIL, PARAMÈTRES, BOUTIQUE, COFFRE)
+   ═══════════════════════════════════════════════════════ */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    padding: 20px;
+}
+
+.modal-content {
+    width: 90%;
+    max-width: 500px;
+    background: linear-gradient(135deg, var(--dark-secondary), var(--dark-main));
+    border: 3px solid var(--neon-cyan);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 0 50px rgba(0, 255, 204, 0.5);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-content h2 {
+    font-size: 2em;
+    color: var(--neon-cyan);
+    text-align: center;
+    margin-bottom: 20px;
+    text-shadow: 0 0 20px rgba(0, 255, 204, 0.8);
+}
+
+.close-modal {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin-top: 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+    background: linear-gradient(135deg, #ff0055, #ff6600);
+    border: 2px solid #ff0055;
+    border-radius: 15px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: inherit;
+}
+
+.close-modal:active {
+    transform: scale(0.95);
+}
+
+/* MODALE PROFIL */
+#profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    display: block;
+    border: 4px solid var(--neon-cyan);
+    object-fit: cover;
+    box-shadow: 0 0 30px rgba(0, 255, 204, 0.6);
+}
+
+#profile-stats p {
+    font-size: 1.1em;
+    margin: 10px 0;
+    color: var(--neon-purple);
+}
+
+#profile-stats strong {
+    color: var(--neon-cyan);
+}
+
+/* MODALE PARAMÈTRES */
+#settings-content label {
+    display: block;
+    margin: 15px 0 5px;
+    font-size: 1.1em;
+    color: var(--neon-cyan);
+}
+
+#settings-content input,
+#settings-content select {
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--neon-purple);
+    border-radius: 10px;
+    color: var(--neon-cyan);
+    font-family: inherit;
+}
+
+/* MODALE BOUTIQUE */
+.shop-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    margin: 10px 0;
+    background: rgba(139, 0, 255, 0.2);
+    border: 2px solid var(--neon-purple);
+    border-radius: 10px;
+}
+
+.shop-item p {
+    flex: 1;
+    color: var(--neon-cyan);
+}
+
+.shop-item button {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, var(--neon-gold), #ff9500);
+    border: 2px solid var(--neon-gold);
+    border-radius: 10px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: inherit;
+}
+
+.shop-item button:active {
+    transform: scale(0.95);
+}
+
+/* MODALE COFFRE */
+.moon-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin: 10px 0;
+    background: rgba(0, 255, 204, 0.1);
+    border: 2px solid var(--neon-cyan);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.moon-item:hover {
+    background: rgba(0, 255, 204, 0.2);
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
+}
+
+.moon-emoji {
+    font-size: 3em;
+    margin-right: 15px;
+}
+
+.moon-info {
+    flex: 1;
+}
+
+.moon-info h3 {
+    color: var(--neon-cyan);
+    margin-bottom: 5px;
+}
+
+.moon-info p {
+    color: var(--neon-purple);
+    font-size: 0.9em;
+}
+
+/* ═══════════════════════════════════════════════════════
+   DIALOGUE DE LA LUNE
+   ═══════════════════════════════════════════════════════ */
+#moon-dialog {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    background: rgba(10, 10, 20, 0.95);
+    border: 3px solid var(--neon-purple);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 0 50px rgba(139, 0, 255, 0.8);
+    z-index: 9000;
+    display: none;
+}
+
+#moon-dialog.active {
+    display: block;
+    animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+    from { bottom: -200px; opacity: 0; }
+    to { bottom: 20px; opacity: 1; }
+}
+
+#moon-dialog p {
+    color: var(--neon-cyan);
+    font-size: 1.1em;
+    font-style: italic;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ZONES GPS (COULEURS DYNAMIQUES)
+   ═══════════════════════════════════════════════════════ */
+.zone-blue #gps-card {
+    border-color: #0064ff;
+    box-shadow: 0 0 50px rgba(0, 100, 255, 0.8);
+}
+
+.zone-green #gps-card {
+    border-color: #00ff88;
+    box-shadow: 0 0 50px rgba(0, 255, 136, 0.8);
+}
+
+.zone-orange #gps-card {
+    border-color: #ff9500;
+    box-shadow: 0 0 50px rgba(255, 149, 0, 0.8);
+}
+
+.zone-red #gps-card {
+    border-color: #ff0055;
+    box-shadow: 0 0 50px rgba(255, 0, 85, 0.8);
+}
+
+/* ═══════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════ */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+@keyframes glitch {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(2px, -2px); }
+    60% { transform: translate(-2px, -2px); }
+    80% { transform: translate(2px, 2px); }
+}
+
+.pulse-animation {
+    animation: pulse 0.5s ease-in-out 2 !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+   DÉTAILS LUNE
+   ═══════════════════════════════════════════════════════ */
+.moon-details {
+    text-align: center;
+    padding: 20px;
+}
+
+.moon-details h3 {
+    font-size: 24px;
+    color: #00ffff;
+    margin-bottom: 20px;
+}
+
+.moon-details .moon-emoji {
+    font-size: 80px;
+    margin: 20px 0;
+}
+
+.moon-screenshot {
+    max-width: 100%;
+    border-radius: 10px;
+    margin: 20px 0;
+    border: 2px solid #00ffff;
+}
+
+.btn-close {
+    background: #ff00ff;
+    color: #fff;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.btn-close:hover {
+    background: #ff66ff;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ÉCRAN FINAL
+   ═══════════════════════════════════════════════════════ */
+.final-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 2s;
+}
+
+.final-screen.visible {
+    opacity: 1;
+}
+
+.final-content {
+    text-align: center;
+    max-width: 600px;
+    padding: 20px;
+}
+
+.final-content h1 {
+    font-size: 48px;
+    color: #00ff00;
+    margin-bottom: 30px;
+    animation: glitch 2s infinite;
+}
+
+.final-selfie {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid #00ffff;
+    margin: 20px auto;
+    display: block;
+    object-fit: cover;
+    box-shadow: 0 0 30px #00ffff;
+}
+
+.final-stats {
+    background: rgba(0, 255, 255, 0.1);
+    border: 2px solid #00ffff;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 30px 0;
+}
+
+.final-stats p {
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+.final-stats strong {
+    color: #00ff00;
+}
+
+.final-message {
+    margin: 30px 0;
+}
+
+.moon-speech {
+    font-size: 20px;
+    color: #ff00ff;
+    font-style: italic;
+    margin: 15px 0;
+}
+
+.final-word {
+    font-size: 80px;
+    color: #fff;
+    margin: 40px 0;
+    text-shadow: 0 0 20px #fff;
+}
+
+.btn-final {
+    background: linear-gradient(45deg, #ff00ff, #00ffff);
+    color: #fff;
+    border: none;
+    padding: 15px 40px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 15px;
+    cursor: pointer;
+    box-shadow: 0 5px 20px rgba(255, 0, 255, 0.5);
+    transition: all 0.3s;
+}
+
+.btn-final:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 255, 255, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════
+   RÉALITÉ AUGMENTÉE
+   ═══════════════════════════════════════════════════════ */
+#ar-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 10000;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#moon-viewer {
+    width: 100%;
+    height: 80vh;
+}
+
+.ar-capture-btn {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #00ff88, #00ccff);
+    color: #0a0e27;
+    border: 3px solid #00ff88;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.8);
+    animation: pulse 1.5s infinite;
+}
+
+.ar-capture-btn:active {
+    transform: translateX(-50%) scale(0.95);
+}
+
+.ar-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    font-size: 2rem;
+    background: rgba(255, 0, 0, 0.8);
+    color: white;
+    border: 2px solid #ff0055;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(255, 0, 85, 0.8);
+}
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 30px rgba(0, 255, 136, 0.8); }
+    50% { box-shadow: 0 0 50px rgba(0, 255, 136, 1); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   🔧 CLASSES UTILITAIRES (CRITIQUES)
+   ═══════════════════════════════════════════════════════ */
+
+/* Cacher un élément */
+.hidden {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Afficher un élément */
+.active {
+    display: flex !important;
+    opacity: 1 !important;
+    pointer-events: all !important;
+}
+
+/* Afficher en block */
+.show {
+    display: block !important;
+}
+
+/* Transition fluide */
+.fade-in {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.fade-out {
+    animation: fadeOut 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.95); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   📱 ÉTATS SPÉCIFIQUES DES ÉCRANS
+   ═══════════════════════════════════════════════════════ */
+
+/* Écran de chargement : visible au démarrage */
+#loading-screen {
+    display: flex !important;
+}
+
+/* Écran selfie : caché au démarrage */
+#selfie-screen {
+    display: none !important;
+}
+
+#selfie-screen.active {
+    display: flex !important;
+}
+
+/* Container du jeu : caché au démarrage */
+#game-container {
+    display: none !important;
+}
+
+#game-container.active {
+    display: flex !important;
+}
+
+/* Bouton AR : caché par défaut, visible en zone bleue */
+#ar-btn {
+    display: none !important;
+    opacity: 0;
+}
+
+#ar-btn.show {
+    display: block !important;
+    opacity: 1;
+    animation: arAppear 0.5s ease forwards;
+}
+
+@keyframes arAppear {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   🎭 MODALES (PROFIL, PARAMÈTRES, COFFRE)
+   ═══════════════════════════════════════════════════════ */
+
+/* Toutes les modales cachées par défaut */
+.modal-overlay {
+    display: none !important;
+}
+
+.modal-overlay.active {
+    display: flex !important;
+}
+
+/* Container AR caché par défaut */
+#ar-container {
+    display: none !important;
+}
+
+#ar-container.active {
+    display: flex !important;
+}
+
+/* Dialogue de la Lune */
+#moon-dialog {
+    bottom: -200px;
+    transition: bottom 0.5s ease;
+}
+
+#moon-dialog.active {
+    bottom: 20px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   🎮 ANIMATIONS SPÉCIALES
+   ═══════════════════════════════════════════════════════ */
+
+/* Bouton coffre avec notification */
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff0000;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8em;
+    font-weight: bold;
+    animation: badge-pulse 1s infinite;
+}
+
+@keyframes badge-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+/* Effet de capture réussie */
+.capture-success {
+    animation: captureFlash 0.3s ease;
+}
+
+@keyframes captureFlash {
+    0%, 100% { background: transparent; }
+    50% { background: rgba(0, 255, 136, 0.5); }
+}
+
+/* Boussole qui tourne */
+.compass-active {
+    animation: compassSpin 3s linear infinite;
+}
+
+@keyframes compassSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   📱 RESPONSIVE (MOBILE-FIRST)
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+    #distance {
+        font-size: 3em;
+    }
+    
+    #header h2 {
+        font-size: 1.2em;
+    }
+    
+    .action-btn {
+        font-size: 0.9em;
+        padding: 12px 8px;
+    }
+    
+    .modal-content {
+        padding: 20px;
+    }
+}
+
+@media (min-width: 768px) {
+    #gps-card {
+        max-width: 500px;
+    }
+    
+    .modal-content {
+        max-width: 600px;
+    }
+}
